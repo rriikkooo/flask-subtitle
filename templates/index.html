@@ -69,13 +69,14 @@
             });
 
             socket.on('subtitle', (data) => {
-                console.log('Received subtitle data:', data);
-                const latestSubtitle = data.slice(-1)[0];
+                // console.log('Received subtitle data:', data);
+                const latestSubtitle = data;
                 // 受け取ったデータを表示
                 document.getElementById('message').innerText = latestSubtitle.text;
-                document.getElementById('message').style.color = latestSubtitle.color;
+                // document.getElementById('message').style.color = latestSubtitle.color;
+                document.getElementById('message').style.color = `rgb(${latestSubtitle.color[0]}, ${latestSubtitle.color[1]}, ${latestSubtitle.color[2]})`;
                 document.getElementById('message').style.fontFamily = latestSubtitle.font;
-                document.getElementById('message').style.fontSize = latestSubtitle.size;
+                document.getElementById('message').style.fontSize = "40px";
                 document.getElementById('eng-message').innerText = latestSubtitle.eng;
                 document.getElementById('eng-message').style.fontFamily = latestSubtitle.font;
             });
