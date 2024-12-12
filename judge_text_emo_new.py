@@ -121,13 +121,14 @@ def emotion_main(text):
         font = get_emotion_font(word)
         orientation = get_emotion_orientation(word)
         activation = get_emotion_activation(word)
-        print(color,font,orientation,activation)
+        #print(color,font,orientation,activation)
         emo_dict = dict(word=word,color=color, font=font,orientation=orientation,activation=activation)
         print(emo_dict)
+        return emo_dict
 
 
 #===================以下テスト用===================================
 text1 = "部屋も予想よりも広くびっくりしました!サプライズで誕生日を祝ってくれてとても嬉しいです。"
-text2 = ""
-emotion_main(text1)
+text2 = "夕食がとても美味しく友達も喜んでいました。ありがとうございます！客室担当方はフレンドリーで丁寧に接客してくれました。朝ご飯もちょうどいいくらいの量で満足でした。部屋も予想よりも広くびっくりしました。"
+emotion_main(text2)
 #emotion_main(text2)

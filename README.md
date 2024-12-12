@@ -23,3 +23,16 @@
 ```python -m unidic download```
 3. modelをダウンロード
 ```https://drive.google.com/drive/folders/1m6GMidvSFkqOmZ35PmFaVR7bIBE15j3M?usp=drive_link```
+
+# メモ
+- main.py
+    - speech_recognition.py (音声認識)
+        - emorecognition.py (？)
+            - judge_text_emo_new.py (感情分析 単語ごとver)
+        - speaker_recognition.py (話者分析)
+    - app.py (Flask GUI Webサーバー)
+
+# 修正箇所
+1. jsonファイルを単語ごとに色を管理できるように修正
+2. jsonファイルを読み込んでGUIが単語ごとに色を付けられるように修正
+3. speech_recognition.pyが単語ごとのjsonファイルに対応できるように修正

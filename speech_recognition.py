@@ -86,7 +86,10 @@ class SpeechRecognition:
             translate_text = ""
 
         if len(set(self.text_log)) == 1 or "text" in result:
-            emo_style = self.emotion.get_text_emo_style(text)
+            if text != "":
+                emo_style = self.emotion.get_text_emo_style(text)
+            else:
+                emo_style = {"color": (0, 0, 0), "font": "Arial"}
         else:
             emo_style = {"color": (0, 0, 0), "font": "Arial"}
         
@@ -140,7 +143,7 @@ class SpeechRecognition:
                     else:
                         result = self._str_to_json(rec.PartialResult())
                         result["partial"] = result["partial"].replace(" ", "")
-                        print(f"partial:{result['partial']}")
+                        #print(f"partial:{result['partial']}")
                     
                     self._result_input_queue(result)
 

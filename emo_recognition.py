@@ -1,8 +1,9 @@
-import judge_text_emo
+import judge_text_emo_new as judge_text_emo
 
 class Emotion:
     def __init__(self):
         pass
 
     def get_text_emo_style(self, text):
-        return judge_text_emo.get_text_emo_style(text)
+        return judge_text_emo.emotion_main(text)
+        #return judge_text_emo.get_text_emo_style(text)
