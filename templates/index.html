@@ -69,7 +69,7 @@
             });
 
             socket.on('subtitle', (data) => {
-                // console.log('Received subtitle data:', data);
+                console.log('Received subtitle data:', data);
                 const latestSubtitle = data;
                 // 受け取ったデータを表示
                 document.getElementById('message').innerText = latestSubtitle.text;

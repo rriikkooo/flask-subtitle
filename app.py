@@ -3,6 +3,7 @@ from flask_socketio import SocketIO, emit
 import json
 import os
 from multiprocessing import Queue
+import json
 
 class SubtitleApp:
     def __init__(self, queue):
@@ -43,4 +44,12 @@ class SubtitleApp:
 if __name__ == "__main__":
     queue = Queue()
     app = SubtitleApp(queue)
+
+    # subtitles.jsonを読み込んでqueueにputする
+    with open("subtitles.json") as f:
+        json_data = json.load(f)
+        queue.put(json_data) # 多分これじゃダメ
+        print("json_data", json_data)    
+
     app.run()
+    print("app run")

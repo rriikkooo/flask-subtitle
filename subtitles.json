@@ -3,57 +3,12 @@
     "subtitles": [
         {
             "index": 1,
-            "datetime": "2020-01-01T00:00:00.00",
-            "text": "こんにちは！",
-            "eng": "Hello!",
-            "speaker": "Speaker Name",
-            "color": "#000000",
-            "font": "Arial"
-        },
-        {
-            "index": 2,
-            "datetime": "2020-01-01T00:00:01.00",
-            "text": "元気ですか？",
-            "eng": "How are you?",
-            "speaker": "Speaker Name",
-            "color": "#000000",
-            "font": "Arial"
-        },
-        {
-            "index": 3,
             "datetime": "2020-01-01T00:00:02.00",
-            "text": "お元気ですか？",
+            "text": "こんにちは",
             "eng": "How are you?",
             "speaker": "Speaker Name",
             "color": "#000000",
             "font": "Arial"
-        },
-        {
-            "index": 4,
-            "datetime": "2020-01-01T00:00:03.00",
-            "text": "元気です！",
-            "eng": "I'm fine!",
-            "speaker": "Speaker Name",
-            "color": "#000000",
-            "font": "Arial"
-        },
-        {
-            "index": 5,
-            "datetime": "2020-01-01T00:00:04.00",
-            "text": "ありがとう！",
-            "eng": "Thank you!",
-            "speaker": "Speaker Name",
-            "color": "#000000",
-            "font": "Arial"
-        },
-        {
-            "index": 6,
-            "datetime": "2020-01-01T00:00:05.00",
-            "text": "さようなら！",
-            "eng": "Goodbye!",
-            "speaker": "Speaker Name",
-            "color": "#ff00ff",
-            "font": "ZenOldMincho-Regular"
         }
     ]
 }
