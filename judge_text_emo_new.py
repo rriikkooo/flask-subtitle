@@ -7,6 +7,7 @@ emotion_analyzer = MLAsk()
 #================以下から各辞書の定義===============================
 
 #色の辞書：10色（デフォルトの黒は辞書にない）
+'''
 emotion_color_map = {
     "takaburi": (233, 113, 50),
     "ikari": (255, 0, 0),
@@ -18,6 +19,19 @@ emotion_color_map = {
     "yorokobi": (255, 192, 0),
     "haji": (192, 79, 21),
     "suki": (216, 110, 204)
+}
+'''
+emotion_color_map_hex = {
+    "takaburi": "#E97132",
+    "ikari": "#FF0000",
+    "iya": "#A02B93",
+    "aware": "#156082",
+    "odoroki": "#0F9ED5",
+    "kowa": "#196B24",
+    "yasu": "#8ED973",
+    "yorokobi": "#FFC000",
+    "haji": "#C04F15",
+    "suki": "#D86ECC"
 }
 
 #フォントの辞書（デフォルトのフォントは辞書にない）
@@ -59,9 +73,9 @@ def get_emotion_color(text):
     result = emotion_analyzer.analyze(text)
     try:
         emotion = result["representative"][0]  # 'representative'を使って感情を取得
-        return emotion_color_map.get(emotion, (0, 0, 0))  # デフォルトの色
+        return emotion_color_map_hex.get(emotion, "#000000")  # デフォルトの色
     except:
-        return (0, 0, 0) # デフォルトの色
+        return "#000000" # デフォルトの色
 
 
 def get_emotion_font(text):
@@ -116,6 +130,7 @@ def emotion_main(text):
        dict:以下の様に出力
             {'word': '単語', 'color': (0, 0, 0), 'font': 'HGRSMP.ttf', 'orientation': 'NEUTRAL', 'activation': 'NEUTRAL'}
     """
+    emo_dicts = []
     for word in (mecab.parse(text)).split():  # 品詞分解
         color = get_emotion_color(word)
         font = get_emotion_font(word)
@@ -123,12 +138,12 @@ def emotion_main(text):
         activation = get_emotion_activation(word)
         #print(color,font,orientation,activation)
         emo_dict = dict(word=word,color=color, font=font,orientation=orientation,activation=activation)
-        print(emo_dict)
-        return emo_dict
+        emo_dicts.append(emo_dict)
+    return emo_dicts
 
 
 #===================以下テスト用===================================
 text1 = "部屋も予想よりも広くびっくりしました!サプライズで誕生日を祝ってくれてとても嬉しいです。"
 text2 = "夕食がとても美味しく友達も喜んでいました。ありがとうございます！客室担当方はフレンドリーで丁寧に接客してくれました。朝ご飯もちょうどいいくらいの量で満足でした。部屋も予想よりも広くびっくりしました。"
-emotion_main(text2)
+print(emotion_main(text1))
 #emotion_main(text2)

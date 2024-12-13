@@ -87,12 +87,35 @@ class SpeechRecognition:
 
         if len(set(self.text_log)) == 1 or "text" in result:
             if text != "":
-                emo_style = self.emotion.get_text_emo_style(text)
+                emo_dicts = self.emotion.get_text_emo_style(text)
+                words = []
+                for idx, emo_dict in enumerate(emo_dicts):
+                    word = {
+                        "no": idx + 1,
+                        "text": emo_dict["word"],
+                        "color": emo_dict["color"],
+                        "font": emo_dict["font"].split('.')[0],
+                        "size": 40,
+                    }
+                    words.append(word)
+                emo_style = {
+                    "index": self._queue_input_json_index,
+                    "datetime": datetime.datetime.now().isoformat(),
+                    "words": words,
+                    "eng": translate_text,
+                    "speaker": speaker,
+                    "color": "#000000",
+                    "font": "Arial"
+                }
+                emo_dict = dict(emo_style)
+                self._queue_input_json.put(emo_dict)
+                self._queue_input_json_index += 1          
             else:
                 emo_style = {"color": (0, 0, 0), "font": "Arial"}
         else:
             emo_style = {"color": (0, 0, 0), "font": "Arial"}
         
+        '''
         template = {
             "index": self._queue_input_json_index,
             "datetime": datetime.datetime.now().isoformat(),
@@ -102,10 +125,14 @@ class SpeechRecognition:
             "color": emo_style["color"],
             "font": emo_style["font"]
         }
-        
+
+
         if template["text"] != "":
             self._queue_input_json.put(template)
         self._queue_input_json_index += 1
+
+        '''
+
 
     def run(self):
         try:

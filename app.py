@@ -11,7 +11,6 @@ class SubtitleApp:
         self.app = Flask(__name__)
         self.app.config['SECRET_KEY'] = 'secret!'
         self.subtitle_data = []
-        # self.app.config['DEBUG'] = False
         self.socketio = SocketIO(self.app)
 
         # ルートの設定
@@ -39,14 +38,18 @@ class SubtitleApp:
         キューを監視して新しいデータはすぐに送信
         """
         while True:
-            json_data = self.queue.get()  # キューからデータを取得（ブロッキング）
-            self.subtitle_data.append(json_data)  # データを保存
-            self.socketio.emit('update_subtitles', json_data)  # クライアントに送信
+            try:
+                # キューからデータを取得（非ブロッキング）
+                json_data = self.queue.get(timeout=1)  # タイムアウト付きで取得
+                self.subtitle_data.append(json_data)  # データを保存
+                # Flask-SocketIO の emit を使用して非同期でクライアントに送信
+                self.socketio.emit('update_subtitles', json_data)
+            except Exception as e:
+                self.socketio.sleep(0.1)  # 非ブロッキングで少し待機
 
     def run(self, host="0.0.0.0", port=5000):
-        # キューを監視するスレッドを開始
-        thread = threading.Thread(target=self.watch_queue, daemon=True)
-        thread.start()
+        # watch_queueをバックグラウンドタスクとして起動
+        self.socketio.start_background_task(target=self.watch_queue)
         # Flask-SocketIOサーバーを起動
         self.socketio.run(self.app, host=host, port=port)
 
@@ -55,11 +58,9 @@ if __name__ == "__main__":
     queue = Queue()
     app = SubtitleApp(queue)
     # subtitle.jsonを読み込んでqueueに入れる
-    json_data = {}
     with open("subtitles.json") as f:
         json_data = json.load(f)
     for subtitle in json_data["subtitles"]:
         queue.put(subtitle)
     # Flask起動        
     app.run()
-
