@@ -1,0 +1,14 @@
+{
+    "version": "1.0",
+    "subtitles": [
+        {
+            "index": 1,
+            "datetime": "2020-01-01T00:00:02.00",
+            "text": "こんにちは",
+            "eng": "How are you?",
+            "speaker": "Speaker Name",
+            "color": "#000000",
+            "font": "Arial"
+        }
+    ]
+}

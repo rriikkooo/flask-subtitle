@@ -56,11 +56,21 @@
             left: 50%;
             transform: translate(-50%, -50%);
         }
+        #text-area {
+            display: inline-block;
+            font-size: 100px;
+            text-align: center;
+            white-space: nowrap;
+        }
     </style>    
     <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
     <script type="text/javascript" charset="utf-8">
         document.addEventListener("DOMContentLoaded", () => {
             var socket = io();
+            const messageArea = document.getElementById('text-area');
+
+            // waiting subtitle...を表示する
+            messageArea.innerText = 'waiting subtitle...';
 
             socket.on('connect', () => {
                 console.log('Connected to server');
@@ -71,22 +81,24 @@
             socket.on('subtitle', (data) => {
                 console.log('Received subtitle data:', data);
                 const latestSubtitle = data;
-                // 受け取ったデータを表示
-                document.getElementById('message').innerText = latestSubtitle.text;
-                // document.getElementById('message').style.color = latestSubtitle.color;
-                document.getElementById('message').style.color = `rgb(${latestSubtitle.color[0]}, ${latestSubtitle.color[1]}, ${latestSubtitle.color[2]})`;
-                document.getElementById('message').style.fontFamily = latestSubtitle.font;
-                document.getElementById('message').style.fontSize = "40px";
-                document.getElementById('eng-message').innerText = latestSubtitle.eng;
-                document.getElementById('eng-message').style.fontFamily = latestSubtitle.font;
+               // jsonのwordsごとをtext-areaにspanタグで追加する
+                messageArea.innerHTML = '';
+                latestSubtitle.words.forEach((word) => {
+                    const span = document.createElement('span');
+                    span.innerText = word.text;
+                    span.style.color = word.color;
+                    span.style.fontFamily = word.font;
+                    span.style.fontSize = word.size + '%';
+                    messageArea.appendChild(span);
+                });
             });
         });
     </script>
 </head>
 <body>
     <div class="main">
-        <h1 id="message">Waiting for subtitle...</h1>
-        <h2 id="eng-message"></h2>
+        <div id="text-area"></div>
+        <div id="eng-text-area"></div>
     </div>
 </body>
 </html>

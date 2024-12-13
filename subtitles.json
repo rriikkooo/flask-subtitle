@@ -1,10 +1,32 @@
 {
-    "version": "1.0",
+    "version": "2.0",
     "subtitles": [
         {
             "index": 1,
             "datetime": "2020-01-01T00:00:02.00",
-            "text": "こんにちは",
+            "words": [
+                {
+                    "no": 1,
+                    "text": "私",
+                    "color": "#000000",
+                    "font": "Arial",
+                    "size": 100
+                },
+                {
+                    "no": 2,
+                    "text": "は",
+                    "color": "#000000",
+                    "font": "Arial",
+                    "size": 40                    
+                },
+                {
+                    "no": 3,
+                    "text": "元気",
+                    "color": "#ff0000",
+                    "font": "Arial",
+                    "size": 40                    
+                }
+            ],
             "eng": "How are you?",
             "speaker": "Speaker Name",
             "color": "#000000",
