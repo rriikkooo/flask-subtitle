@@ -20,7 +20,7 @@ class SpeechRecognition:
         self._translator = Translator()
         self._recorder = record.Recorder(filename="record.wav")
         self.emotion = Emotion()
-        self.text_log = ["", "", ""]
+        self.previous_text = ""
 
         # コマンドライン引数の設定
         parser = argparse.ArgumentParser(add_help=False)
@@ -63,30 +63,20 @@ class SpeechRecognition:
         return json.loads(result)
     
     def _result_input_queue(self, result):
-        if "text" in result:
-            text = result["text"]
-        else:
-            text = result["partial"]
+        text = result["text"] if "text" in result else result["partial"]
+        speaker = result["spk"] if "spk" in result else ""
 
-        if text != "":
-            self.text_log.append(text)
-            self.text_log.pop(0)
-        
-        if "spk" in result:
-            speaker = result["spk"]
-        else:
-            speaker = ""
-        
-        if "text" in result and text != "":
-            try:
-                translate_text = self._translator.translate(text, src='ja', dest='en').text
-            except:
+        MIN_TEXT_LEN = 1
+        if len(text) > MIN_TEXT_LEN:
+            if "text" in result:
+                try:
+                    translate_text = self._translator.translate(text, src='ja', dest='en').text
+                except:
+                    translate_text = ""
+            else:
                 translate_text = ""
-        else:
-            translate_text = ""
 
-        if len(set(self.text_log)) == 1 or "text" in result:
-            if text != "":
+            if self.previous_text != text:
                 emo_dicts = self.emotion.get_text_emo_style(text)
                 words = []
                 for idx, emo_dict in enumerate(emo_dicts):
@@ -112,27 +102,9 @@ class SpeechRecognition:
                 self._queue_input_json_index += 1          
             else:
                 emo_style = {"color": (0, 0, 0), "font": "Arial"}
-        else:
-            emo_style = {"color": (0, 0, 0), "font": "Arial"}
-        
-        '''
-        template = {
-            "index": self._queue_input_json_index,
-            "datetime": datetime.datetime.now().isoformat(),
-            "text": text,
-            "eng": translate_text,
-            "speaker": speaker,
-            "color": emo_style["color"],
-            "font": emo_style["font"]
-        }
 
-
-        if template["text"] != "":
-            self._queue_input_json.put(template)
-        self._queue_input_json_index += 1
-
-        '''
-
+            # テキスト情報を保持
+            self.previous_text = text
 
     def run(self):
         try:
@@ -160,17 +132,17 @@ class SpeechRecognition:
                     if not self._is_silent(data):
                         pass
                         # self._recorder.start()
-                    if rec.AcceptWaveform(data) or len(self.text_log[-1]) > 80:
+                    if rec.AcceptWaveform(data) or len(self.previous_text) > 30:
                         # self._recorder.stop()
                         result = self._str_to_json(rec.Result())
                         result["text"] = result["text"].replace(" ", "")
                         print(f"text:{result['text']}")
-                        if "spk" in result:
-                            print(self._speaker_recognition.recognition(result["spk"], result["text"]))
+                        # if "spk" in result:
+                        #     print(self._speaker_recognition.recognition(result["spk"], result["text"]))
                     else:
                         result = self._str_to_json(rec.PartialResult())
                         result["partial"] = result["partial"].replace(" ", "")
-                        #print(f"partial:{result['partial']}")
+                        print(f"partial:{result['partial']}")
                     
                     self._result_input_queue(result)
 

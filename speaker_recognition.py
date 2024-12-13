@@ -1,8 +1,6 @@
 import ndjson
-import sys
 import os
-import json
-from vosk import Model, KaldiRecognizer, SpkModel, SetLogLevel
+from vosk import Model, SetLogLevel
 import numpy as np
 
 # ログの非表示

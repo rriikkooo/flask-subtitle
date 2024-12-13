@@ -4,7 +4,7 @@ from sys import version_info
 import re
 
 PY2 = True if version_info < (3,) else False
-IS_MECAB_PYTHON3 = bool(getattr(MeCab, "Tagger_version", False))
+IS_MECAB_PYTHON3 = bool(getattr(MeCab, "Tagger_version", True))
 RE_POS = re.compile('感動|フィラー')
 RE_MIDAS = re.compile('^(?:て|ね)(?:え|ぇ)$')
 
@@ -72,7 +72,7 @@ class EditMLAsk(MLAsk):
                 else:
                     features = row[1].split(',')
                 if len(features) > 7:
-                    (pos, subpos, lemma) = features[0], features[1], features[7]
+                    (pos, subpos, lemma) = features[0], features[1], features[6]
                 elif len(features) == 1:
                     pos = None
                     subpos = None

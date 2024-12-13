@@ -1,8 +1,8 @@
 import MeCab
-from mlask import MLAsk
+from edit_mlask import EditMLAsk
 
 mecab = MeCab.Tagger("-Owakati") #品詞分解後の単語のみを取得するモード
-emotion_analyzer = MLAsk()
+emotion_analyzer = EditMLAsk()
 
 #================以下から各辞書の定義===============================
 
@@ -142,8 +142,8 @@ def emotion_main(text):
     return emo_dicts
 
 
-#===================以下テスト用===================================
-text1 = "部屋も予想よりも広くびっくりしました!サプライズで誕生日を祝ってくれてとても嬉しいです。"
-text2 = "夕食がとても美味しく友達も喜んでいました。ありがとうございます！客室担当方はフレンドリーで丁寧に接客してくれました。朝ご飯もちょうどいいくらいの量で満足でした。部屋も予想よりも広くびっくりしました。"
-print(emotion_main(text1))
-#emotion_main(text2)
+if __name__ == "__main__":
+    #===================以下テスト用===================================
+    text1 = "不気味"
+    text2 = "夕食がとても美味しく友達も喜んでいました。ありがとうございます！客室担当方はフレンドリーで丁寧に接客してくれました。朝ご飯もちょうどいいくらいの量で満足でした。部屋も予想よりも広くびっくりしました。"
+    print(emotion_main(text1))

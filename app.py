@@ -3,7 +3,6 @@ from flask_socketio import SocketIO, emit
 import json
 import os
 from multiprocessing import Queue
-import threading
 
 class SubtitleApp:
     def __init__(self, queue):
@@ -40,12 +39,12 @@ class SubtitleApp:
         while True:
             try:
                 # キューからデータを取得（非ブロッキング）
-                json_data = self.queue.get(timeout=1)  # タイムアウト付きで取得
+                json_data = self.queue.get(timeout=0.025)  # タイムアウト付きで取得
                 self.subtitle_data.append(json_data)  # データを保存
                 # Flask-SocketIO の emit を使用して非同期でクライアントに送信
                 self.socketio.emit('update_subtitles', json_data)
             except Exception as e:
-                self.socketio.sleep(0.1)  # 非ブロッキングで少し待機
+                self.socketio.sleep(0.025)  # 非ブロッキングで少し待機
 
     def run(self, host="0.0.0.0", port=5000):
         # watch_queueをバックグラウンドタスクとして起動
