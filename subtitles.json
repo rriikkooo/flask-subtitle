@@ -28,9 +28,35 @@
                 }
             ],
             "eng": "How are you?",
-            "speaker": "Speaker Name",
             "color": "#000000",
-            "font": "Arial"
+            "font": "Arial",
+            "size": 40,
+            "speaker": "Speaker Name"
+        },
+        {
+            "index": 2,
+            "datetime": "2020-01-01T00:00:05.00",
+            "words": [
+                {
+                    "no": 1,
+                    "text": "元気",
+                    "color": "#000000",
+                    "font": "Arial",
+                    "size": 100
+                },
+                {
+                    "no": 2,
+                    "text": "です",
+                    "color": "#000000",
+                    "font": "Arial",
+                    "size": 40                    
+                }
+            ],
+            "eng": "I'm fine.",
+            "color": "#000000",
+            "font": "Arial",
+            "size": 40,
+            "speaker": "Speaker Name"
         }
     ]
 }

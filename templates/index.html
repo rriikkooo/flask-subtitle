@@ -56,21 +56,15 @@
             left: 50%;
             transform: translate(-50%, -50%);
         }
-        #text-area {
-            display: inline-block;
-            font-size: 100px;
-            text-align: center;
-            white-space: nowrap;
-        }
     </style>    
     <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
     <script type="text/javascript" charset="utf-8">
         document.addEventListener("DOMContentLoaded", () => {
             var socket = io();
-            const messageArea = document.getElementById('text-area');
-
-            // waiting subtitle...を表示する
-            messageArea.innerText = 'waiting subtitle...';
+            const textArea = document.getElementById('text-area');
+            const engTextArea = document.getElementById('eng-text-area');
+            textArea.innerText = '読み込み中...';
+            engTextArea.innerText = 'Loading...';
 
             socket.on('connect', () => {
                 console.log('Connected to server');
@@ -78,19 +72,24 @@
                 socket.emit('get_subtitles');
             });
 
-            socket.on('subtitle', (data) => {
+            socket.on('update_subtitles', (data) => {
                 console.log('Received subtitle data:', data);
                 const latestSubtitle = data;
-               // jsonのwordsごとをtext-areaにspanタグで追加する
-                messageArea.innerHTML = '';
+                // jsonのwordsごとをtext-areaにspanタグで追加する
+                textArea.innerHTML = '';
                 latestSubtitle.words.forEach((word) => {
                     const span = document.createElement('span');
                     span.innerText = word.text;
                     span.style.color = word.color;
                     span.style.fontFamily = word.font;
-                    span.style.fontSize = word.size + '%';
-                    messageArea.appendChild(span);
+                    span.style.fontSize = word.size + 'px';
+                    textArea.appendChild(span);
                 });
+                // 英語の字幕を表示
+                engTextArea.innerText = latestSubtitle.eng;
+                engTextArea.style.color = latestSubtitle.color;
+                engTextArea.style.fontFamily = latestSubtitle.font;
+                engTextArea.style.fontSize = latestSubtitle.size + 'px';
             });
         });
     </script>
