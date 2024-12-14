@@ -5,5 +5,4 @@ class Emotion:
         pass
 
     def get_text_emo_style(self, text):
-        return judge_text_emo.emotion_main(text)
-        #return judge_text_emo.get_text_emo_style(text)
+        return judge_text_emo.emotion_main_words(text)

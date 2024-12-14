@@ -1,13 +1,8 @@
-import MeCab
 from edit_mlask import EditMLAsk
 
-mecab = MeCab.Tagger("-Owakati") #品詞分解後の単語のみを取得するモード
 emotion_analyzer = EditMLAsk()
 
-#================以下から各辞書の定義===============================
-
-#色の辞書：10色（デフォルトの黒は辞書にない）
-'''
+# 色の辞書：10色（デフォルトの黒は辞書にない）
 emotion_color_map = {
     "takaburi": (233, 113, 50),
     "ikari": (255, 0, 0),
@@ -20,7 +15,7 @@ emotion_color_map = {
     "haji": (192, 79, 21),
     "suki": (216, 110, 204)
 }
-'''
+
 emotion_color_map_hex = {
     "takaburi": "#E97132",
     "ikari": "#FF0000",
@@ -34,7 +29,7 @@ emotion_color_map_hex = {
     "suki": "#D86ECC"
 }
 
-#フォントの辞書（デフォルトのフォントは辞書にない）
+# フォントの辞書（デフォルトのフォントは辞書にない）
 emotion_font_map = {
     "takaburi": "DelaGothicOne-Regular.ttf",
     "ikari": "ReggaeOne-Regular.ttf",
@@ -48,102 +43,124 @@ emotion_font_map = {
     "suki": "YuseiMagic-Regular.ttf"
 }
 
-# Orientation(ネガポジ分類)の辞書（3種,デフォルトはNEUTRAL）
+# Orientation(ネガポジ分類)の辞書（3種, デフォルトはNEUTRAL）
 orientation_map = {
     "POSITIVE": "POSITIVE",
+    "mostly_POSITIVE":"POSITIVE",
+    "mostly_NEGATIVE":"NEGATIVE",
     "NEGATIVE": "NEGATIVE",
     "NEUTRAL": "NEUTRAL"
 }
 
-# Activation(活性分類)の辞書（3種,デフォルトはNEUTRAL）
+# Activation(活性分類)の辞書（3種, デフォルトはNEUTRAL）
 activation_map = {
     "ACTIVE": "ACTIVE",
+    "mostly_ACTIVE":"ACTIVE",
     "PASSIVE": "PASSIVE",
+    "mostly_PASSIVE":"PASSIVE",
     "NEUTRAL": "NEUTRAL"
 }
 
-#=============以下から各関数の定義==========================================================
-def get_emotion_color(text):
-    """textのRGB値を返す
+def get_emotion_data(result):
+    """ 感情分析の結果から単語、色、フォント、ネガポジ分類、活性分類を抽出する
     Args:
-       text(str):RGB値を知りたい文字列
+       result(dict): 感情分析の結果
     Returns:
-       int:右の形で出力されます-> (0,0,0)
+       list: 感情分析の結果に基づく辞書のリスト
+    """
+    words_emotions = result['emotion']  # 感情と単語の対応関係を取得
+    orientation = result.get('orientation', 'NEUTRAL')  # ネガポジ分類を取得
+    activation = result.get('activation', 'NEUTRAL')  # 活性分類を取得
+
+    # 各単語に対して、感情、色、フォント、ネガポジ、活性を取得して辞書リストを生成
+    emotion_data = []
+    for emotion, words in words_emotions.items():
+        for word in words:
+            color = emotion_color_map_hex.get(emotion, "#000000")  # 感情に対応する色を取得
+            font = emotion_font_map.get(emotion, "HGRSMP.ttf")  # 感情に対応するフォントを取得
+            emo_dict = dict(
+                word=word,
+                color=color,
+                font=font,
+                orientation=orientation_map.get(orientation, "NEUTRAL"),  # ネガポジ分類
+                activation=activation_map.get(activation, "NEUTRAL")  # 活性分類
+            )
+            emotion_data.append(emo_dict)
+    return emotion_data
+
+def get_representative_emotion(result):
+    """ 文章全体の代表的な感情を取得する
+    Args:
+       result(dict): 感情分析の結果
+    Returns:
+       dict: 代表的な感情に基づく辞書
+    """
+    representative_emotion = result.get("representative", None) # 代表する感情を取得
+    orientation = result.get("orientation", "NEUTRAL")  # ネガポジ分類を取得
+    activation = result.get("activation", "NEUTRAL")  # 活性分類を取得
+    word = result.get("text","")
+
+    if representative_emotion:
+        emotion = representative_emotion[0]  # 代表する感情を取得
+        color = emotion_color_map_hex.get(emotion, "#000000")  # 感情に対応する色を取得
+        font = emotion_font_map.get(emotion, "HGRSMP.ttf")  # 感情に対応するフォントを取得
+        
+        return dict(
+            word=word,
+            emotion=emotion,
+            color=color,
+            font=font,
+            orientation=orientation_map.get(orientation, "NEUTRAL"),  # ネガポジ分類
+            activation=activation_map.get(activation, "NEUTRAL")  # 活性分類
+        )
+    else:
+        # 代表する感情がない場合、デフォルト値を返す
+        return dict(
+            word=word,
+            emotion="NEUTRAL",
+            color=(0, 0, 0),
+            font="HGRSMP.ttf",
+            orientation="NEUTRAL",
+            activation="NEUTRAL"
+        )
+
+def emotion_main_words(text):
+    """ 文章全体から感情分析を行い、「単語ごとに」１つの結果を出力する
+    Args:
+       text(str): 感情分析を行いたい文章
     """
     result = emotion_analyzer.analyze(text)
-    try:
-        emotion = result["representative"][0]  # 'representative'を使って感情を取得
-        return emotion_color_map_hex.get(emotion, "#000000")  # デフォルトの色
-    except:
-        return "#000000" # デフォルトの色
+    emotion_data = get_emotion_data(result)
+    
+    return emotion_data
 
-
-def get_emotion_font(text):
-    """ textのフォント(.ttfファイル)を返す
+def emotion_main_text(text):
+    """ 文章全体から代表的な感情を推定し、「入力文字列に対して」１つの結果を出力する
     Args:
-       text(str):RGB値を知りたい文字列
-    Returns:
-       str:右の形で出力されます-> HGRME.ttf
+       text(str): 感情分析を行いたい文章
     """
     result = emotion_analyzer.analyze(text)
-    try:
-        emotion = result["representative"][0]
-        return emotion_font_map.get(emotion, "HGRSMP.ttf")  
-    except:
-        return "HGRSMP.ttf"  # デフォルトのフォント
+    emotion_data = get_representative_emotion(result)
 
+    return emotion_data
 
-def get_emotion_orientation(text):
-    """ ネガポジ分類を取得
-    Args:
-       text(str):ネガポジ分類を知りたい文字列
-    Returns:
-       str:右の形で出力されます-> NEUTRAL
-    """
-    result = emotion_analyzer.analyze(text)
-    try:
-        orientation = result.get("orientation", "NEUTRAL")
-        return orientation_map.get(orientation, "NEUTRAL")  # ネガポジを分類
-    except:
-        return "NEUTRAL"
-
-
-def get_emotion_activation(text):
-    """ 活性分類を取得
-    Args:
-       text(str):活性分類を知りたい文字列
-    Returns:
-       str:右の形で出力されます-> NEUTRAL
-    """
-    result = emotion_analyzer.analyze(text)
-    try:
-        activation = result.get("activation", "NEUTRAL")
-        return activation_map.get(activation, "PASSIVE")  # 活性度を分類
-    except:
-        return "NEUTRAL"
-
-def emotion_main(text):
-    """ テキストを単語に分解して分析結果を取得
-    Args:
-       text(str):分析したい文字列
-    Returns:
-       dict:以下の様に出力
-            {'word': '単語', 'color': (0, 0, 0), 'font': 'HGRSMP.ttf', 'orientation': 'NEUTRAL', 'activation': 'NEUTRAL'}
-    """
-    emo_dicts = []
-    for word in (mecab.parse(text)).split():  # 品詞分解
-        color = get_emotion_color(word)
-        font = get_emotion_font(word)
-        orientation = get_emotion_orientation(word)
-        activation = get_emotion_activation(word)
-        #print(color,font,orientation,activation)
-        emo_dict = dict(word=word,color=color, font=font,orientation=orientation,activation=activation)
-        emo_dicts.append(emo_dict)
-    return emo_dicts
-
-
+    
+#-----------------------------------------------------------------------------------------------------------------------
+# テスト用
 if __name__ == "__main__":
-    #===================以下テスト用===================================
-    text1 = "不気味"
-    text2 = "夕食がとても美味しく友達も喜んでいました。ありがとうございます！客室担当方はフレンドリーで丁寧に接客してくれました。朝ご飯もちょうどいいくらいの量で満足でした。部屋も予想よりも広くびっくりしました。"
-    print(emotion_main(text1))
+    text = "こんにちは"
+    print(emotion_main_words(text))
+    # print(emotion_main_text(text))
+
+    #出力見本
+    """emotion_main_words(text)
+    {'word': 'びっくり', 'color': (15, 158, 213), 'font': 'KosugiMaru-Regular.ttf', 'orientation': 'POSITIVE', 'activation': 'ACTIVE'}
+    {'word': 'フレンドリー', 'color': (216, 110, 204), 'font': 'YuseiMagic-Regular.ttf', 'orientation': 'POSITIVE', 'activation': 'ACTIVE'}
+    {'word': '丁寧', 'color': (255, 192, 0), 'font': 'MochiyPopOne-Regular.ttf', 'orientation': 'POSITIVE', 'activation': 'ACTIVE'}
+    {'word': '満足', 'color': (255, 192, 0), 'font': 'MochiyPopOne-Regular.ttf', 'orientation': 'POSITIVE', 'activation': 'ACTIVE'}
+    """
+    """emotion_main_text(text)
+
+    {'word': '夕食がとても美味しく友達も喜んでいました。ありがとうございます！客室担当方はフレンドリーで丁寧に接客してくれました。朝ご飯もちょうどいいくらいの量で満足でした。部屋も予想よりも広くびっくりしました。', 
+    'emotion': 'suki', 'color': (216, 110, 204), 'font': 'YuseiMagic-Regular.ttf', 'orientation': 'POSITIVE', 'activation': 'ACTIVE'}
+    """
