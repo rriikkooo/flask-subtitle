@@ -3,6 +3,10 @@ from flask_socketio import SocketIO, emit
 import json
 import os
 from multiprocessing import Queue
+import datetime
+import atexit
+import signal
+import sys
 
 class SubtitleApp:
     def __init__(self, queue):
@@ -10,6 +14,9 @@ class SubtitleApp:
         self.app = Flask(__name__)
         self.app.config['SECRET_KEY'] = 'secret!'
         self.subtitle_data = []
+        self.log_filename = datetime.datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
+        # プログラム終了時に呼び出す関数を登録
+        atexit.register(self.on_exit)
         self.socketio = SocketIO(self.app)
 
         # ルートの設定
@@ -51,6 +58,12 @@ class SubtitleApp:
         self.socketio.start_background_task(target=self.watch_queue)
         # Flask-SocketIOサーバーを起動
         self.socketio.run(self.app, host=host, port=port)
+
+    def on_exit(self):
+        # ログ保存
+        with open(f"log/{self.log_filename}.json", "w", encoding="utf-8") as json_file:
+            json.dump(self.subtitle_data, json_file, ensure_ascii=False, indent=4)
+        print(f"jsonファイル{self.log_filename}.jsonを保存しました。")
 
 # アプリの実行
 if __name__ == "__main__":

@@ -64,7 +64,8 @@ class SpeechRecognition:
     
     def _result_input_queue(self, result):
         text = result["text"] if "text" in result else result["partial"]
-        speaker = result["spk"] if "spk" in result else ""
+        # speaker = result["spk"] if "spk" in result else ""
+        speaker = ""
 
         MIN_TEXT_LEN = 1
         if len(text) > MIN_TEXT_LEN:
