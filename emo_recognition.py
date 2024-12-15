@@ -1,4 +1,4 @@
-import judge_text_emo_new as judge_text_emo
+import judge_text_emo_new_v2 as judge_text_emo
 
 class Emotion:
     def __init__(self):
