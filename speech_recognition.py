@@ -10,6 +10,7 @@ from googletrans import Translator
 import numpy as np
 from vosk import Model, KaldiRecognizer, SpkModel
 from emo_recognition import Emotion
+from predict_text import CERTextMatcher
 
 class SpeechRecognition:
     def __init__(self, queue_=None):
@@ -20,6 +21,7 @@ class SpeechRecognition:
         self._translator = Translator()
         self._recorder = record.Recorder(filename="record.wav")
         self.emotion = Emotion()
+        self.textmacher = CERTextMatcher("output.txt", cer_threshold=0.4)
         self.previous_text = ""
 
         # コマンドライン引数の設定
@@ -68,16 +70,19 @@ class SpeechRecognition:
         speaker = ""
 
         MIN_TEXT_LEN = 1
-        if len(text) > MIN_TEXT_LEN:
+        if len(text) > MIN_TEXT_LEN or len(set(text)) > 1:
+            text = self.textmacher.find_best_match(text)
             if "text" in result:
                 try:
-                    translate_text = self._translator.translate(text, src='ja', dest='en').text
+                    # translate_text = self._translator.translate(text, src='ja', dest='en').text
+                    # print(translate_text)
+                    translate_text = ""
                 except:
                     translate_text = ""
             else:
                 translate_text = ""
 
-            if self.previous_text != text:
+            if self.previous_text != text or "text" in result:
                 emo_dicts = self.emotion.get_text_emo_style(text)
                 words = []
                 for idx, emo_dict in enumerate(emo_dicts):
@@ -86,7 +91,7 @@ class SpeechRecognition:
                         "text": emo_dict["word"],
                         "color": emo_dict["color"],
                         "font": emo_dict["font"].split('.')[0],
-                        "size": 40,
+                        "size": 60,
                     }
                     words.append(word)
                 emo_style = {
@@ -96,7 +101,8 @@ class SpeechRecognition:
                     "eng": translate_text,
                     "speaker": speaker,
                     "color": "#000000",
-                    "font": "Arial"
+                    "font": "Arial",
+                    "size": 30
                 }
                 emo_dict = dict(emo_style)
                 self._queue_input_json.put(emo_dict)
@@ -133,7 +139,7 @@ class SpeechRecognition:
                     if not self._is_silent(data):
                         pass
                         # self._recorder.start()
-                    if rec.AcceptWaveform(data) or len(self.previous_text) > 30:
+                    if rec.AcceptWaveform(data) or len(self.previous_text) > 40:
                         # self._recorder.stop()
                         result = self._str_to_json(rec.Result())
                         result["text"] = result["text"].replace(" ", "")

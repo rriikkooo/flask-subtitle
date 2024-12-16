@@ -148,7 +148,7 @@ def emotion_main_text(text):
 #-----------------------------------------------------------------------------------------------------------------------
 # テスト用
 if __name__ == "__main__":
-    text = "こんにちは"
+    text = "嬉しい楽しい好き嫌い"
     print(emotion_main_words(text))
     # print(emotion_main_text(text))
 

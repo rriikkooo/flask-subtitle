@@ -1,6 +1,7 @@
 import MeCab
 from edit_mlask import EditMLAsk
 
+mecab = MeCab.Tagger("-Owakati") #品詞分解後の単語のみを取得するモード
 emotion_analyzer = EditMLAsk()
 
 # 色の辞書：10色（デフォルトの黒は辞書にない）
@@ -62,6 +63,14 @@ activation_map = {
     "NEUTRAL": "NEUTRAL"
 }
 
+# 辞書のリストを生成する関数
+def create_emotion_text_list(data):
+    result = []
+    for emotion, texts in data.items():
+        for text in texts:
+            result.append({"emotion": emotion, "word": text})
+    return result
+
 def get_emotion_data(result):
     """ 感情分析の結果から単語、色、フォント、ネガポジ分類、活性分類を抽出する
     Args:
@@ -79,18 +88,56 @@ def get_emotion_data(result):
 
     # 各単語に対して、感情、色、フォント、ネガポジ、活性を取得して辞書リストを生成
     emotion_data = []
-    for emotion, words in words_emotions.items():
-        for word in words:
-            color = emotion_color_map_hex.get(emotion, "#000000")  # 感情に対応する色を取得
-            font = emotion_font_map.get(emotion, "HGRSMP.ttf")  # 感情に対応するフォントを取得
-            emo_dict = dict(
-                word=word,
-                color=color,
-                font=font,
-                orientation=orientation_map.get(orientation, "NEUTRAL"),  # ネガポジ分類
-                activation=activation_map.get(activation, "NEUTRAL")  # 活性分類
-            )
-            emotion_data.append(emo_dict)
+    hold_add_emo_word = []
+    words_with_emo = create_emotion_text_list(words_emotions)
+    for orig_word in (mecab.parse(result.get("text", ""))).split():  # 品詞分解
+        # if orig_word in hold_add_emo_word:
+        #     continue
+        emo_dict = {'word': orig_word, 'emotion': 'NEUTRAL', 'color': '#000000', 'font': 'HGRSMP.ttf', 'orientation': orientation_map.get(orientation, 'NEUTRAL'), 'activation': activation_map.get(activation, 'NEUTRAL')}
+        for word_with_emo in words_with_emo:
+            if orig_word in word_with_emo["word"]:
+                color = emotion_color_map_hex.get(word_with_emo["emotion"], "#000000")  # 感情に対応する色を取得
+                font = emotion_font_map.get(word_with_emo["emotion"], "HGRSMP.ttf")  # 感情に対応するフォントを取得
+                emo_dict = dict(
+                    word=orig_word,
+                    color=color,
+                    font=font,
+                    orientation=orientation_map.get(orientation, "NEUTRAL"),  # ネガポジ分類
+                    activation=activation_map.get(activation, "NEUTRAL")  # 活性分類
+                )
+                # emotion_data.append(emo_dict)
+                break
+        emotion_data.append(emo_dict)
+        # hold_add_emo_word.append(orig_word)
+        # for emotion, words in words_emotions.items():
+        #     for word in words:
+        #         if orig_word in word:
+        #             color = emotion_color_map_hex.get(emotion, "#000000")  # 感情に対応する色を取得
+        #             font = emotion_font_map.get(emotion, "HGRSMP.ttf")  # 感情に対応するフォントを取得
+        #             emo_dict = dict(
+        #                 word=orig_word,
+        #                 color=color,
+        #                 font=font,
+        #                 orientation=orientation_map.get(orientation, "NEUTRAL"),  # ネガポジ分類
+        #                 activation=activation_map.get(activation, "NEUTRAL")  # 活性分類
+        #             )
+        #             emotion_data.append(emo_dict)
+        #             break
+        #         else:
+        #             emotion_data.append({'word': orig_word, 'emotion': 'NEUTRAL', 'color': '#000000', 'font': 'HGRSMP.ttf', 'orientation': orientation_map.get(orientation, 'NEUTRAL'), 'activation': activation_map.get(activation, 'NEUTRAL')})
+                
+    # for emotion, words in words_emotions.items():
+    #     for word in words:
+    #         color = emotion_color_map_hex.get(emotion, "#000000")  # 感情に対応する色を取得
+    #         font = emotion_font_map.get(emotion, "HGRSMP.ttf")  # 感情に対応するフォントを取得
+    #         emo_dict = dict(
+    #             word=word,
+    #             color=color,
+    #             font=font,
+    #             orientation=orientation_map.get(orientation, "NEUTRAL"),  # ネガポジ分類
+    #             activation=activation_map.get(activation, "NEUTRAL")  # 活性分類
+    #         )
+    #         emotion_data.append(emo_dict)
     
     return emotion_data
 
@@ -155,7 +202,8 @@ def emotion_main_text(text):
 #-----------------------------------------------------------------------------------------------------------------------
 # テスト用
 if __name__ == "__main__":
-    text = "嬉しい楽しい好き嫌い"
+    # text = "彼女のことが嫌いではない！(;´Д`)"
+    text = "嬉しい喜び悲しい嫌いではない"
     print(emotion_main_words(text))
     # print(emotion_main_text(text))
 
