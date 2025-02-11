@@ -60,44 +60,87 @@
     <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
     <script type="text/javascript" charset="utf-8">
         document.addEventListener("DOMContentLoaded", () => {
-            var socket = io();
+            const socket = io();
+            const subtitles = [];
             const textArea = document.getElementById('text-area');
-            const engTextArea = document.getElementById('eng-text-area');
             textArea.innerText = '読み込み中...';
-            engTextArea.innerText = 'Loading...';
 
+            setupSocketEvents(socket);
+        });
+
+        /**
+         * Socket.IO のイベントリスナーを設定
+         * @param {Socket} socket
+         */
+        function setupSocketEvents(socket) {
             socket.on('connect', () => {
                 console.log('Connected to server');
-                // サーバーに字幕データの要求を送信
                 socket.emit('get_subtitles');
             });
 
             socket.on('update_subtitles', (data) => {
                 console.log('Received subtitle data:', data);
-                const latestSubtitle = data;
-                // jsonのwordsごとをtext-areaにspanタグで追加する
-                textArea.innerHTML = '';
-                latestSubtitle.words.forEach((word) => {
-                    const span = document.createElement('span');
-                    span.innerText = word.text;
-                    span.style.color = word.color;
-                    span.style.fontFamily = word.font;
-                    span.style.fontSize = word.size + 'px';
-                    textArea.appendChild(span);
-                });
-                // 英語の字幕を表示
-                engTextArea.innerText = latestSubtitle.eng;
-                engTextArea.style.color = latestSubtitle.color;
-                engTextArea.style.fontFamily = latestSubtitle.font;
-                engTextArea.style.fontSize = latestSubtitle.size + 'px';
+                updateSubtitles(data);
             });
-        });
+        }
+
+        /**
+         * 字幕データを更新
+         * @param {Object} subtitle
+         */
+        function updateSubtitles(subtitle) {
+            const textArea = document.getElementById('text-area');
+            //textArea.innerHTML = '';
+
+            const subtitleElement = createSubtitleElement(subtitle);
+            textArea.appendChild(subtitleElement);
+        }
+
+        /**
+         * 字幕要素を作成
+         * @param {Object} subtitle
+         * @returns {HTMLDivElement} 字幕の親 div 要素
+         */
+        function createSubtitleElement(subtitle) {
+            const div = document.createElement('div');
+            div.id = "subtitle-" + subtitle.index;
+
+            const text = document.createElement('div');
+            text.className = 'text';
+            div.appendChild(text);
+
+            const eng = document.createElement('div');
+            eng.className = 'eng';
+            eng.style.fontFamily = subtitle.font;
+            eng.style.fontSize = subtitle.size + 'px';
+            eng.innerText = subtitle.eng;
+            div.appendChild(eng);
+
+            subtitle.words.forEach((word) => {
+                text.appendChild(createWordElement(word));
+            });
+
+            return div;
+        }
+
+        /**
+         * 日本語字幕の単語要素を作成
+         * @param {Object} word
+         * @returns {HTMLSpanElement} 単語の span 要素
+         */
+        function createWordElement(word) {
+            const span = document.createElement('span');
+            span.innerText = word.text;
+            span.style.color = word.color;
+            span.style.fontFamily = word.font;
+            span.style.fontSize = word.size + 'px';
+            return span;
+        }
     </script>
 </head>
 <body>
     <div class="main">
         <div id="text-area"></div>
-        <div id="eng-text-area"></div>
     </div>
 </body>
 </html>
