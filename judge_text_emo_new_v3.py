@@ -19,6 +19,7 @@ emotion_color_map = {
 }
 
 emotion_color_map_hex = {
+    "NEUTRAL":"#000000",
     "takaburi": "#E97132",
     "ikari": "#FF0000",
     "iya": "#A02B93",
@@ -49,9 +50,10 @@ emotion_font_map = {
 orientation_map = {
     "POSITIVE": "POSITIVE",
     "mostly_POSITIVE":"POSITIVE",
+    "NEUTRAL": "NEUTRAL",
     "mostly_NEGATIVE":"NEGATIVE",
-    "NEGATIVE": "NEGATIVE",
-    "NEUTRAL": "NEUTRAL"
+    "NEGATIVE": "NEGATIVE"
+
 }
 
 # Activation(活性分類)の辞書（3種, デフォルトはNEUTRAL）
@@ -62,6 +64,21 @@ activation_map = {
     "mostly_PASSIVE":"PASSIVE",
     "NEUTRAL": "NEUTRAL"
 }
+
+#感情の度合い化のためのマップとリスト
+combination_color_map={}
+emotions = ["NEUTRAL","takaburi", "ikari", "iya", "aware", "odoroki", "kowa", "yasu", "yorokobi", "haji", "suki"]
+orientations = ["POSITIVE", "NEGATIVE", "NEUTRAL"]
+activations = ["ACTIVE", "PASSIVE", "NEUTRAL"]
+# 90通りの組み合わせに対して感情に対応する色を設定
+for emotion in emotions:
+    for orientation in orientations:
+        for activation in activations:
+            # デフォルトとして感情に基づく色を設定
+            combination_color_map[(emotion, orientation, activation)] = emotion_color_map_hex[emotion]
+
+#以下に色を個別に定義する(emotion, orientation, activation)
+combination_color_map[("suki", "POSITIVE", "NEUTRAL")] = "!!!!!!!!!"  # 新しい色
 
 # 辞書のリストを生成する関数
 def create_emotion_text_list(data):
@@ -96,48 +113,23 @@ def get_emotion_data(result):
         emo_dict = {'word': orig_word, 'emotion': 'NEUTRAL', 'color': '#000000', 'font': 'HGRSMP.ttf', 'orientation': orientation_map.get(orientation, 'NEUTRAL'), 'activation': activation_map.get(activation, 'NEUTRAL')}
         for word_with_emo in words_with_emo:
             if orig_word in word_with_emo["word"]:
-                color = emotion_color_map_hex.get(word_with_emo["emotion"], "#000000")  # 感情に対応する色を取得
+                orientation=orientation_map.get(orientation, "NEUTRAL")  # ネガポジ分類
+                activation=activation_map.get(activation, "NEUTRAL")  # 活性分類
+                #color = emotion_color_map_hex.get(word_with_emo["emotion"], "#000000")  # 感情に対応する色を取得 (2024/12ver)
+                color = combination_color_map.get((emotion, orientation, activation), "#000000") # 感情に対応する色を取得 (2025/2ver)
                 font = emotion_font_map.get(word_with_emo["emotion"], "HGRSMP.ttf")  # 感情に対応するフォントを取得
                 emo_dict = dict(
+                    emotion=emotion,
                     word=orig_word,
                     color=color,
                     font=font,
-                    orientation=orientation_map.get(orientation, "NEUTRAL"),  # ネガポジ分類
-                    activation=activation_map.get(activation, "NEUTRAL")  # 活性分類
+                    orientation=orientation,  # ネガポジ分類
+                    activation=activation  # 活性分類
                 )
                 # emotion_data.append(emo_dict)
                 break
         emotion_data.append(emo_dict)
-        # hold_add_emo_word.append(orig_word)
-        # for emotion, words in words_emotions.items():
-        #     for word in words:
-        #         if orig_word in word:
-        #             color = emotion_color_map_hex.get(emotion, "#000000")  # 感情に対応する色を取得
-        #             font = emotion_font_map.get(emotion, "HGRSMP.ttf")  # 感情に対応するフォントを取得
-        #             emo_dict = dict(
-        #                 word=orig_word,
-        #                 color=color,
-        #                 font=font,
-        #                 orientation=orientation_map.get(orientation, "NEUTRAL"),  # ネガポジ分類
-        #                 activation=activation_map.get(activation, "NEUTRAL")  # 活性分類
-        #             )
-        #             emotion_data.append(emo_dict)
-        #             break
-        #         else:
-        #             emotion_data.append({'word': orig_word, 'emotion': 'NEUTRAL', 'color': '#000000', 'font': 'HGRSMP.ttf', 'orientation': orientation_map.get(orientation, 'NEUTRAL'), 'activation': activation_map.get(activation, 'NEUTRAL')})
-                
-    # for emotion, words in words_emotions.items():
-    #     for word in words:
-    #         color = emotion_color_map_hex.get(emotion, "#000000")  # 感情に対応する色を取得
-    #         font = emotion_font_map.get(emotion, "HGRSMP.ttf")  # 感情に対応するフォントを取得
-    #         emo_dict = dict(
-    #             word=word,
-    #             color=color,
-    #             font=font,
-    #             orientation=orientation_map.get(orientation, "NEUTRAL"),  # ネガポジ分類
-    #             activation=activation_map.get(activation, "NEUTRAL")  # 活性分類
-    #         )
-    #         emotion_data.append(emo_dict)
+
     
     return emotion_data
 
@@ -156,7 +148,8 @@ def get_representative_emotion(result):
 
     if representative_emotion:
         emotion = representative_emotion[0]  # 代表する感情を取得
-        color = emotion_color_map_hex.get(emotion, "#000000")  # 感情に対応する色を取得
+        #color = emotion_color_map_hex.get(emotion, "#000000")  # 感情に対応する色を取得(2024/12ver)
+        color = combination_color_map.get((emotion, orientation, activation), "#000000") # 感情に対応する色を取得 (2025/2ver)
         font = emotion_font_map.get(emotion, "HGRSMP.ttf")  # 感情に対応するフォントを取得
         
         return dict(
@@ -172,11 +165,11 @@ def get_representative_emotion(result):
         return dict(
             word=word,
             emotion="NEUTRAL",
-            color=(0, 0, 0),
             font="HGRSMP.ttf",
             orientation="NEUTRAL",
-            activation="NEUTRAL"
-        )
+            activation="NEUTRAL",
+            color=combination_color_map.get((emotion, orientation, activation), "#000000") # 感情に対応する色を取得 (2025/2ver)
+            )
 
 def emotion_main_words(text):
     """ 文章全体から感情分析を行い、「単語ごとに」１つの結果を出力する
@@ -202,19 +195,17 @@ def emotion_main_text(text):
 #-----------------------------------------------------------------------------------------------------------------------
 # テスト用
 if __name__ == "__main__":
-    # text = "彼女のことが嫌いではない！(;´Д`)"
-    text = "嬉しい喜び悲しい嫌いではない"
+    #text = "彼女のことが嫌いではない！(;´Д`)"
+    #ctext = "嬉しい喜び悲しい嫌いではない"
+
     with open("C:/Users/rikotaro/OneDrive - Hiroshima City University (1)/new_kamisibai/広島カープ昔話2023.06.18-2.txt",encoding="utf-8") as f:
-      for s in f:
+     for s in f:
         s_result=emotion_main_words(s)[0]
-        if "emotion" not in s_result.keys():
-            break
-        if s_result["emotion"] == "NEUTRAL" and s_result["orientation"] != "NEUTRAL":
-          print("O",s_result)
-        if s_result["emotion"] == "NEUTRAL" and s_result["activation"] != "NEUTRAL":
-          print("A",s_result)
+        print(emotion_main_words(s))
+        #print(s_result["color"])
+
     #print(emotion_main_words(text))
-    # print(emotion_main_text(text))
+    #print(emotion_main_text(text))
 
     #出力見本
     """emotion_main_words(text)
